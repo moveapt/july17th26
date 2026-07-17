@@ -1,0 +1,10 @@
+name = "moveapt"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "out"
+
+[vars]
+NEXT_PUBLIC_TURNSTILE_SITE_KEY = ""
+
+# Set secrets via: wrangler pages secret put BREVO_API_KEY
+# Set secrets via: wrangler pages secret put BREVO_LIST_ID
+# Set secrets via: wrangler pages secret put TURNSTILE_SECRET
