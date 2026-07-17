@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 declare global {
@@ -21,6 +21,12 @@ type FormState = "idle" | "loading" | "success" | "duplicate" | "error";
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
 
 export function WaitlistForm() {
+  // WaitlistForm renders more than once per page (Hero + CTASection), so the
+  // input id must be unique per instance to keep the <label htmlFor> valid.
+  const uid = useId();
+  const emailInputId = `waitlist-email-${uid}`;
+  const errorId = `form-error-${uid}`;
+
   const [email, setEmail] = useState("");
   const [state, setState] = useState<FormState>("idle");
   const [message, setMessage] = useState("");
@@ -161,11 +167,11 @@ export function WaitlistForm() {
           >
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1">
-                <label htmlFor="waitlist-email" className="sr-only">
+                <label htmlFor={emailInputId} className="sr-only">
                   Email address
                 </label>
                 <input
-                  id="waitlist-email"
+                  id={emailInputId}
                   type="email"
                   value={email}
                   onChange={(e) => {
@@ -193,7 +199,7 @@ export function WaitlistForm() {
                     e.target.style.boxShadow = "none";
                   }}
                   aria-invalid={state === "error"}
-                  aria-describedby={state === "error" ? "form-error" : undefined}
+                  aria-describedby={state === "error" ? errorId : undefined}
                 />
               </div>
               <button
@@ -254,7 +260,7 @@ export function WaitlistForm() {
             <AnimatePresence>
               {state === "error" && (
                 <motion.p
-                  id="form-error"
+                  id={errorId}
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
