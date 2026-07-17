@@ -1,2 +1,1 @@
-# moveAPT Landing
-Upload to GitHub and connect Cloudflare Pages.
+Set Cloudflare Pages env vars: BREVO_API_KEY, BREVO_LIST_ID.
