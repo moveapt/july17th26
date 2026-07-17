@@ -13,26 +13,27 @@
     "cloudflare:deploy": "npm run build && npx wrangler pages deploy ./out --project-name=moveapt"
   },
   "dependencies": {
-    "clsx": "^2.1.1",
-    "framer-motion": "^11.15.0",
+    "clsx": "2.1.1",
+    "framer-motion": "11.18.2",
     "next": "15.5.20",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "tailwind-merge": "^2.5.5"
+    "tailwind-merge": "2.6.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.0.0",
-    "@types/node": "^22.10.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "eslint": "^9.17.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.5",
     "eslint-config-next": "15.5.20",
-    "postcss": "^8.4.49",
-    "prettier": "^3.4.2",
-    "tailwindcss": "^4.0.0",
-    "typescript": "^5.7.2"
+    "postcss": "8.5.19",
+    "prettier": "3.9.5",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3"
   },
   "engines": {
     "node": ">=20.9.0 <23"
-  }
+  },
+  "packageManager": "npm@10.9.2"
 }

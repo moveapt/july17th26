@@ -269,3 +269,7 @@ MIT © moveAPT
 ---
 
 *Built with ❤️ by renters who've returned too many couches.*
+
+### Dependency installation note
+
+This repository intentionally omits `package-lock.json` and pins all direct dependency versions in `package.json`. Cloudflare Pages should therefore run `npm install`; this avoids an `npm ci` failure caused by an out-of-sync lockfile. Do not upload an older lockfile into the repository.

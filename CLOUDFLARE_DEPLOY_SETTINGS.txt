@@ -1,17 +1,12 @@
-Cloudflare Pages deployment settings
-====================================
+CLOUDFLARE PAGES BUILD SETTINGS
 
 Framework preset: Next.js (Static HTML Export)
 Build command: npm run build
 Build output directory: out
-Root directory: leave blank (repository root)
+Root directory: leave blank when package.json is at repository root
 Node.js version: 22
 
-IMPORTANT:
 Do not use: npx @cloudflare/next-on-pages@1
 
-Required production environment variables:
-NEXT_PUBLIC_TURNSTILE_SITE_KEY (plain text, required at build time)
-BREVO_API_KEY (secret)
-BREVO_LIST_ID (secret)
-TURNSTILE_SECRET (secret)
+This repository intentionally does not include package-lock.json. Direct package
+versions are pinned in package.json, and Cloudflare should run npm install.
