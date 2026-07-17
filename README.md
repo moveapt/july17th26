@@ -6,6 +6,20 @@
 
 ---
 
+## Important Cloudflare Build Setting
+
+This repository is a **static Next.js export for Cloudflare Pages**. In the Cloudflare dashboard use exactly:
+
+```text
+Framework preset: Next.js (Static HTML Export)
+Build command: npm run build
+Build output directory: out
+Root directory: leave blank (repository root)
+Node.js version: 22
+```
+
+Do **not** use `npx @cloudflare/next-on-pages@1`. That adapter is not needed for this static-export project and caused the dependency failure in the July 17 deployment log.
+
 ## Tech Stack
 
 - **Framework**: Next.js 15 (static export)
@@ -72,7 +86,7 @@ Open [http://localhost:3000](http://localhost:3000).
 5. Set build settings:
    - **Build command**: `npm run build`
    - **Build output directory**: `out`
-   - **Node.js version**: `20`
+   - **Node.js version**: `22`
 6. Add environment variables (see below).
 7. Click **Save and Deploy**.
 

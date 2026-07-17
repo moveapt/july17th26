@@ -125,7 +125,7 @@ export function Features() {
           >
             Built for renters
             <br />
-            <span className="gradient-text">who've been burned before.</span>
+            <span className="gradient-text">who&apos;ve been burned before.</span>
           </h2>
           <p className="mt-4 text-lg text-slate-400 max-w-xl mx-auto">
             Every feature exists because a real renter had to return a couch on moving day.

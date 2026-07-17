@@ -4,6 +4,15 @@ interface Env {
   TURNSTILE_SECRET: string;
 }
 
+interface PagesContext<TEnv> {
+  request: Request;
+  env: TEnv;
+}
+
+type PagesHandler<TEnv = Record<string, never>> = (
+  context: PagesContext<TEnv>
+) => Response | Promise<Response>;
+
 interface WaitlistRequest {
   email: string;
   token: string;
@@ -61,14 +70,19 @@ async function upsertBrevoContact(
     }),
   });
 
-  const createData: BrevoContactResponse = await createRes.json();
-
   if (createRes.status === 201) {
     return { status: "created" };
   }
 
   if (createRes.status === 204) {
     return { status: "duplicate" };
+  }
+
+  let createData: BrevoContactResponse = {};
+  try {
+    createData = await createRes.json();
+  } catch {
+    // Some Brevo responses have no JSON body.
   }
 
   if (createData.code === "duplicate_parameter") {
@@ -94,7 +108,7 @@ async function upsertBrevoContact(
   };
 }
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
+export const onRequestPost: PagesHandler<Env> = async (context) => {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -105,6 +119,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const body: WaitlistRequest = await context.request.json();
     const { email, token } = body;
+
+    if (!context.env.TURNSTILE_SECRET || !context.env.BREVO_API_KEY || !context.env.BREVO_LIST_ID) {
+      console.error("Missing required Cloudflare Pages environment variables");
+      return new Response(
+        JSON.stringify({ success: false, error: "Service is not configured yet" }),
+        { status: 503, headers: corsHeaders }
+      );
+    }
 
     // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -175,7 +197,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 };
 
-export const onRequestOptions: PagesFunction = async () => {
+export const onRequestOptions: PagesHandler = async () => {
   return new Response(null, {
     status: 204,
     headers: {

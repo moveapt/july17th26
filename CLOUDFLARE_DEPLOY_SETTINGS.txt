@@ -1,0 +1,17 @@
+Cloudflare Pages deployment settings
+====================================
+
+Framework preset: Next.js (Static HTML Export)
+Build command: npm run build
+Build output directory: out
+Root directory: leave blank (repository root)
+Node.js version: 22
+
+IMPORTANT:
+Do not use: npx @cloudflare/next-on-pages@1
+
+Required production environment variables:
+NEXT_PUBLIC_TURNSTILE_SITE_KEY (plain text, required at build time)
+BREVO_API_KEY (secret)
+BREVO_LIST_ID (secret)
+TURNSTILE_SECRET (secret)

@@ -50,7 +50,7 @@ export function Footer() {
               Move smarter. Know before you go.
             </p>
             <p className="mt-3 text-xs text-slate-600">
-              Built by renters who've been there.
+              Built by renters who&apos;ve been there.
             </p>
           </div>
 

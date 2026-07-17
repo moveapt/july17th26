@@ -26,11 +26,6 @@ const testimonials = [
   },
 ];
 
-const pressLogos = [
-  { name: "Product Hunt", url: "#" },
-  { name: "Hacker News", url: "#" },
-  { name: "TechCrunch", url: "#" },
-];
 
 export function SocialProof() {
   const { ref, inView } = useInView();

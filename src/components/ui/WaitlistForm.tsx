@@ -10,6 +10,9 @@ declare global {
       remove: (widgetId: string) => void;
       getResponse: (widgetId: string) => string | undefined;
     };
+    cfAnalytics?: {
+      pushEvent: (eventName: string) => void;
+    };
   }
 }
 
@@ -99,8 +102,8 @@ export function WaitlistForm() {
           setState("success");
           setMessage(data.message);
           // Track signup
-          if (typeof window !== "undefined" && (window as any).cfAnalytics) {
-            (window as any).cfAnalytics?.pushEvent("waitlist_signup");
+          if (typeof window !== "undefined") {
+            window.cfAnalytics?.pushEvent("waitlist_signup");
           }
         }
       } else {
