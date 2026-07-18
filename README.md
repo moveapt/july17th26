@@ -1,4 +1,4 @@
-# moveAPT — Move smarter. Know before you go.
+# moveAPT — Move smarter. Know before you go
 
 > AI-powered furniture fitting tool. Take photos of your furniture, tell us your new apartment, and moveAPT predicts whether everything fits before moving day.
 
