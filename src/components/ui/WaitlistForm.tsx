@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useCallback, useEffect, useId } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 declare global {
@@ -9,6 +9,7 @@ declare global {
       reset: (widgetId: string) => void;
       remove: (widgetId: string) => void;
       getResponse: (widgetId: string) => string | undefined;
+      execute: (widgetId: string) => void;
     };
     cfAnalytics?: {
       pushEvent: (eventName: string) => void;
@@ -30,42 +31,81 @@ export function WaitlistForm() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<FormState>("idle");
   const [message, setMessage] = useState("");
-  const [widgetId, setWidgetId] = useState<string | null>(null);
+  const widgetIdRef = useRef<string | null>(null);
+  const tokenResolverRef = useRef<((token: string) => void) | null>(null);
   const turnstileRef = useRef<HTMLDivElement>(null);
 
-  const renderTurnstile = useCallback(() => {
-    if (!turnstileRef.current || !window.turnstile) return;
-    if (widgetId !== null) {
-      window.turnstile.remove(widgetId);
-    }
-    const id = window.turnstile.render(turnstileRef.current, {
-      sitekey: TURNSTILE_SITE_KEY,
-      theme: "dark",
-      size: "invisible",
-    });
-    setWidgetId(id);
-  }, [widgetId]);
-
   useEffect(() => {
-    const tryRender = () => {
-      if (window.turnstile) {
-        renderTurnstile();
+    const renderWidget = () => {
+      if (!turnstileRef.current || !window.turnstile) return;
+
+      // Clean up any existing widget
+      if (widgetIdRef.current !== null) {
+        window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
       }
+
+      const id = window.turnstile.render(turnstileRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: "dark",
+        size: "invisible",
+        // Called when the challenge completes — resolves the promise in handleSubmit
+        callback: (token: string) => {
+          if (tokenResolverRef.current) {
+            tokenResolverRef.current(token);
+            tokenResolverRef.current = null;
+          }
+        },
+        "error-callback": () => {
+          if (tokenResolverRef.current) {
+            tokenResolverRef.current("");
+            tokenResolverRef.current = null;
+          }
+        },
+        "expired-callback": () => {
+          // Token expired before submit — reset so next submit re-executes
+          if (widgetIdRef.current !== null && window.turnstile) {
+            window.turnstile.reset(widgetIdRef.current);
+          }
+        },
+      });
+
+      widgetIdRef.current = id;
     };
 
-    // Turnstile may already be loaded or loading
     if (window.turnstile) {
-      renderTurnstile();
+      renderWidget();
     } else {
       const interval = setInterval(() => {
         if (window.turnstile) {
           clearInterval(interval);
-          tryRender();
+          renderWidget();
         }
       }, 300);
       return () => clearInterval(interval);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const getToken = (): Promise<string> => {
+    // In dev without a real key, bypass immediately
+    if (process.env.NODE_ENV === "development") {
+      return Promise.resolve("dev-bypass");
+    }
+
+    if (widgetIdRef.current === null || !window.turnstile) {
+      return Promise.resolve("");
+    }
+
+    // If Turnstile already solved the challenge, return the cached token
+    const existing = window.turnstile.getResponse(widgetIdRef.current);
+    if (existing) return Promise.resolve(existing);
+
+    // Otherwise execute the challenge and wait for the callback
+    return new Promise<string>((resolve) => {
+      tokenResolverRef.current = resolve;
+      window.turnstile!.execute(widgetIdRef.current!);
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,16 +120,7 @@ export function WaitlistForm() {
 
     setState("loading");
 
-    // Get Turnstile token
-    let token = "";
-    if (widgetId !== null && window.turnstile) {
-      token = window.turnstile.getResponse(widgetId) || "";
-    }
-
-    // In dev without a real key, use a test bypass token
-    if (!token && process.env.NODE_ENV === "development") {
-      token = "dev-bypass";
-    }
+    const token = await getToken();
 
     try {
       const res = await fetch("/api/waitlist", {
@@ -107,7 +138,6 @@ export function WaitlistForm() {
         } else {
           setState("success");
           setMessage(data.message);
-          // Track signup
           if (typeof window !== "undefined") {
             window.cfAnalytics?.pushEvent("waitlist_signup");
           }
@@ -115,15 +145,15 @@ export function WaitlistForm() {
       } else {
         setState("error");
         setMessage(data.error || "Something went wrong. Please try again.");
-        if (widgetId !== null && window.turnstile) {
-          window.turnstile.reset(widgetId);
+        if (widgetIdRef.current !== null && window.turnstile) {
+          window.turnstile.reset(widgetIdRef.current);
         }
       }
     } catch {
       setState("error");
       setMessage("Network error. Please check your connection and try again.");
-      if (widgetId !== null && window.turnstile) {
-        window.turnstile.reset(widgetId);
+      if (widgetIdRef.current !== null && window.turnstile) {
+        window.turnstile.reset(widgetIdRef.current);
       }
     }
   };
